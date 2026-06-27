@@ -3,52 +3,62 @@ import { slot4BrandConfig } from '@/editable/theme/brand.config'
 export const globalContent = {
   site: {
     name: slot4BrandConfig.siteName,
-    tagline: slot4BrandConfig.tagline || 'Independent reading platform',
+    tagline: slot4BrandConfig.tagline || 'A curated library of saved links',
     domain: slot4BrandConfig.domain,
     baseUrl: slot4BrandConfig.baseUrl,
   },
   nav: {
-    tagline: 'Independent reading platform',
+    tagline: 'Curated collections & saved links',
+    // Public navigation — essential pages only. No profile, no raw task feeds.
     primaryLinks: [
-      { label: 'Articles', href: '/articles' },
-      { label: 'Visuals', href: '/image-sharing' },
-      { label: 'Listings', href: '/listings' },
+      { label: 'Home', href: '/' },
+      { label: 'Collections', href: '/sbm' },
+      { label: 'Search', href: '/search' },
+      { label: 'About', href: '/about' },
       { label: 'Contact', href: '/contact' },
     ],
+    searchPlaceholder: 'Search collections & resources',
     actions: {
-      primary: { label: 'Start exploring', href: '/' },
-      secondary: { label: 'Submit', href: '/contact' },
+      primary: { label: 'Browse collections', href: '/sbm' },
+      secondary: { label: 'Suggest a link', href: '/contact' },
     },
   },
   footer: {
-    tagline: 'Stories, resources, and discoverable posts',
-    description: 'A connected publishing surface for articles, visuals, listings, profiles, bookmarks, and downloadable resources.',
+    tagline: 'Saved links, tools and references worth keeping.',
+    description:
+      'A curated library for bookmarking and discovering the links, tools and resources worth coming back to — organized into collections you can actually use.',
+    newsletter: {
+      title: 'Get the weekly shelf',
+      description: 'A short note of the best new saves and collections, sent once a week. No noise.',
+      placeholder: 'you@example.com',
+      cta: 'Subscribe',
+    },
     columns: [
       {
-        title: 'Explore',
+        title: 'Discover',
         links: [
-          { label: 'Articles', href: '/articles' },
-          { label: 'Listings', href: '/listings' },
-          { label: 'Images', href: '/image-sharing' },
-          { label: 'PDF Library', href: '/pdf' },
+          { label: 'All collections', href: '/sbm' },
+          { label: 'Popular this week', href: '/sbm' },
+          { label: 'Latest saves', href: '/sbm' },
+          { label: 'Search the library', href: '/search' },
         ],
       },
       {
-        title: 'Site',
+        title: 'Library',
         links: [
           { label: 'About', href: '/about' },
           { label: 'Contact', href: '/contact' },
         ],
       },
     ],
-    bottomNote: 'Built for clean discovery and connected publishing.',
+    bottomNote: 'Built for calm discovery and links worth keeping.',
   },
   commonLabels: {
-    readMore: 'Read more',
+    readMore: 'Open resource',
     viewAll: 'View all',
     explore: 'Explore',
-    latest: 'Latest',
+    latest: 'Latest saves',
     related: 'Related',
-    published: 'Published',
+    published: 'Saved',
   },
 } as const
