@@ -32,34 +32,37 @@ export type TaskTheme = {
   radius: string
 }
 
-const YELP_FONT = "'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+const BODY_FONT = "'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+const DISPLAY_FONT = "'Space Grotesk', 'Inter', system-ui, sans-serif"
 
-// Shared Yelp palette — every task inherits this; only kicker/note differ.
+// Shared palette — Nevire-style agency on a LIGHT canvas: warm off-white pages,
+// white cards, near-black ink, hairline warm borders, one botanical-green accent.
+// Every task inherits this; only kicker/note differ. Brand name comes from env.
 const base = {
   dark: false,
-  fontDisplay: YELP_FONT,
-  fontBody: YELP_FONT,
-  bg: '#ffffff',
+  fontDisplay: DISPLAY_FONT,
+  fontBody: BODY_FONT,
+  bg: '#f5f4ef',
   surface: '#ffffff',
-  raised: '#f7f7f7',
-  text: '#1a1a1a',
-  muted: '#6b6b6b',
-  line: '#e6e6e6',
-  accent: '#d32323',
-  accentSoft: '#fdecec',
+  raised: '#eeede6',
+  text: '#16181c',
+  muted: '#5f635d',
+  line: '#e2e0d6',
+  accent: '#2e7d32',
+  accentSoft: '#e6f1e4',
   onAccent: '#ffffff',
-  glow: 'rgba(211,35,35,0.06)',
-  radius: '0.75rem',
+  glow: 'rgba(46,125,50,0.08)',
+  radius: '0.9rem',
 } satisfies Omit<TaskTheme, 'kicker' | 'note'>
 
 export const taskThemes: Record<TaskKey, TaskTheme> = {
-  article: { ...base, kicker: 'Articles', note: 'In-depth reads, guides and stories worth your time.' },
-  listing: { ...base, kicker: 'Businesses', note: 'Find, compare and connect with local businesses.' },
-  classified: { ...base, kicker: 'Marketplace', note: 'Fresh offers and listings, ready to act on.' },
-  image: { ...base, kicker: 'Photos', note: 'A visual feed of standout images and galleries.' },
-  sbm: { ...base, kicker: 'Bookmarks', note: 'Curated resources and links worth saving.' },
-  pdf: { ...base, kicker: 'Documents', note: 'Downloadable guides, reports and references.' },
-  profile: { ...base, kicker: 'People', note: 'Discover creators, businesses and profiles.' },
+  article: { ...base, kicker: 'Reading', note: 'Long-form notes and essays worth coming back to.' },
+  listing: { ...base, kicker: 'Directory', note: 'Curated places and services, gathered in one shelf.' },
+  classified: { ...base, kicker: 'Noticeboard', note: 'Fresh finds and offers, ready to act on.' },
+  image: { ...base, kicker: 'Gallery', note: 'A visual shelf of standout images and references.' },
+  sbm: { ...base, kicker: 'Collections', note: 'Hand-picked links, tools and resources worth saving.' },
+  pdf: { ...base, kicker: 'Library', note: 'Downloadable guides, reports and reference files.' },
+  profile: { ...base, kicker: 'Curator', note: 'The people behind the collections and saves.' },
 }
 
 export function getTaskTheme(task: TaskKey): TaskTheme {
