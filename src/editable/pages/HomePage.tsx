@@ -29,7 +29,14 @@ function uniquePosts(posts: SitePost[]) {
 }
 
 export default async function HomePage() {
-  const primaryTask = (SITE_CONFIG.tasks.find((task) => task.enabled)?.key || 'article') as TaskKey
+  // Public experience is the bookmarking library. Prefer SBM; profiles stay out
+  // of the public feed (they remain reachable by direct URL only).
+  const enabledTasks = SITE_CONFIG.tasks.filter((task) => task.enabled)
+  const primaryTask = (
+    enabledTasks.find((task) => task.key === 'sbm') ||
+    enabledTasks.find((task) => task.key !== 'profile') ||
+    enabledTasks[0]
+  )?.key as TaskKey || 'sbm'
   const primaryRoute = SITE_CONFIG.taskViews[primaryTask] || `/${primaryTask}`
   const taskFeed: TaskFeedItem[] = await fetchHomeTaskFeed(12, { timeoutMs: 2500 })
   const primaryPosts = uniquePosts(taskFeed.find(({ task }) => task.key === primaryTask)?.posts || taskFeed.flatMap(({ posts }) => posts)).slice(0, 24)
@@ -54,7 +61,7 @@ export default async function HomePage() {
       />
       <EditableHomeHero primaryTask={primaryTask} primaryRoute={primaryRoute} posts={primaryPosts} timeSections={timeSections} />
       <div className="mx-auto max-w-6xl px-4 py-6">
-  <Ads slot="header" showLabel eager className="mx-auto w-full" />
+  <Ads slot="" showLabel eager className="mx-auto w-full" />
 </div>
 
       <EditableStoryRail primaryTask={primaryTask} primaryRoute={primaryRoute} posts={primaryPosts} timeSections={timeSections} />
@@ -62,7 +69,7 @@ export default async function HomePage() {
 
       <EditableTimeCollections primaryTask={primaryTask} primaryRoute={primaryRoute} posts={primaryPosts} timeSections={timeSections} />
       <div className="mx-auto max-w-6xl px-4 py-6">
-  <Ads slot="sidebar" showLabel eager className="mx-auto w-full" />
+  <Ads slot="footer" showLabel eager className="mx-auto w-full" />
 </div>
       <EditableHomeCta />
       </main>

@@ -25,8 +25,8 @@ body {
 }
 
 .editable-site-root {
-  /* Yelp-style clean sans, used for both display and body. */
-  --editable-font-display: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  /* Modern agency display grotesk (Space Grotesk) + clean body sans (Inter). */
+  --editable-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   --editable-font-body: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
   /* Premium easing curve used across every hover + transition. */
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
@@ -120,4 +120,90 @@ body {
 
 .article-content a {
   color: var(--slot4-accent-fill);
+}
+
+/*
+  ---------------------------------------------------------------------------
+  Scroll reveal — fail-safe.
+
+  Content is FULLY VISIBLE by default (no JS, no hydration). Only once the
+  global observer (EditableReveal) adds `.reveal-ready` to <html> do the
+  reveal styles arm: elements start hidden and animate in when scrolled into
+  view. If JS never runs, nothing is hidden and everything stays readable.
+  ---------------------------------------------------------------------------
+*/
+html.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  transition: opacity 0.7s var(--ease-premium), transform 0.7s var(--ease-premium);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+html.reveal-ready [data-reveal].reveal-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.reveal-ready [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Premium nav underline that grows from the centre on hover/active. */
+.editable-navlink::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  right: 50%;
+  bottom: -2px;
+  height: 2px;
+  background: var(--slot4-accent);
+  transition: left 0.3s var(--ease-premium), right 0.3s var(--ease-premium);
+}
+.editable-navlink:hover::after,
+.editable-navlink[data-active='true']::after {
+  left: 0;
+  right: 0;
+}
+
+/* Top reading-progress bar (article/resource detail). */
+.editable-progress {
+  transform-origin: 0 50%;
+  transform: scaleX(var(--reading-progress, 0));
+  transition: transform 0.1s linear;
+}
+
+/*
+  Nevire-style infinite marquee. Two identical tracks slide left in lockstep so
+  the row never shows a gap. Pure CSS; pauses for reduced-motion users.
+*/
+@keyframes editable-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.editable-marquee {
+  display: inline-flex;
+  flex-shrink: 0;
+  min-width: 100%;
+  white-space: nowrap;
+  animation: editable-marquee var(--marquee-duration, 32s) linear infinite;
+  will-change: transform;
+}
+.editable-marquee-track:hover .editable-marquee {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .editable-marquee {
+    animation: none;
+  }
+}
+
+/* Tighter optical tracking on the very large agency display headings. */
+.editable-site-root h1.editable-display,
+.editable-site-root .editable-hero-title {
+  letter-spacing: -0.03em;
 }

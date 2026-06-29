@@ -1,5 +1,6 @@
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
-import { ArrowUpRight, BriefcaseBusiness, ChevronDown, Download, FileText, Globe, MapPin, Phone, Search, Star, UserRound } from 'lucide-react'
+import { ArrowUpRight, BriefcaseBusiness, ChevronDown, Download, ExternalLink, FileText, Globe, MapPin, Phone, Search, Star, UserRound } from 'lucide-react'
 import { buildTaskMetadata } from '@/lib/seo'
 import { CATEGORY_OPTIONS, normalizeCategory } from '@/lib/categories'
 import { fetchPaginatedTaskPosts, buildPostUrl } from '@/lib/task-data'
@@ -9,6 +10,7 @@ import { taskPageMetadata } from '@/config/site.content'
 import { taskPageVoices } from '@/editable/content/task-pages.content'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
 import { getTaskTheme, taskThemeStyle } from '@/editable/theme/task-themes'
+import { Ads } from '@/lib/ads'
 
 export const revalidate = 3
 
@@ -45,7 +47,12 @@ const getField = (post: SitePost, keys: string[]) => {
   }
   return ''
 }
-const cleanDomain = (value: string) => value.replace(/^https?:\/\//, '').replace(/\/$/, '')
+const cleanDomain = (value: string) => value.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '')
+const faviconFor = (value: string) => {
+  const domain = cleanDomain(value)
+  return domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : ''
+}
+const getTags = (post: SitePost) => (Array.isArray(post.tags) ? post.tags.filter((tag) => typeof tag === 'string' && tag.trim()).slice(0, 4) : [])
 
 function pageHref(basePath: string, category: string, page: number) {
   const params = new URLSearchParams()
@@ -116,41 +123,71 @@ export function TaskArchiveView({ task, posts, pagination, category, basePath }:
               </div>
             ) : null}
 
-            <div className="mt-12 flex flex-col gap-4 border-t border-[var(--tk-line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-12 flex flex-col gap-4 border-t border-[var(--tk-line)] pt-6 lg:flex-row lg:items-center lg:justify-between">
               <p className="text-sm text-[var(--tk-muted)]">
-                <span className="font-semibold text-[var(--tk-text)]">{posts.length}</span> {posts.length === 1 ? 'post' : 'posts'} · {categoryLabel}
+                <span className="font-semibold text-[var(--tk-text)]">{posts.length}</span> {posts.length === 1 ? 'resource' : 'resources'} · {categoryLabel}
               </p>
-              <form action={basePath} className="flex items-center gap-2.5">
-                <div className="relative">
-                  <select
-                    name="category"
-                    defaultValue={category}
-                    className="h-11 appearance-none rounded-full border border-[var(--tk-line)] bg-[var(--tk-surface)] pl-4 pr-10 text-sm font-medium text-[var(--tk-text)] outline-none transition focus:border-[var(--tk-accent)]"
-                    aria-label={voice?.filterLabel || 'Filter category'}
-                  >
-                    <option value="all">All categories</option>
-                    {CATEGORY_OPTIONS.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--tk-muted)]" />
-                </div>
-                <button className="inline-flex h-11 items-center rounded-full bg-[var(--tk-accent)] px-5 text-sm font-semibold text-[var(--tk-on-accent)] transition hover:opacity-90">Apply</button>
-              </form>
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+                <form action="/search" className="flex h-11 items-center gap-2 rounded-full border border-[var(--tk-line)] bg-[var(--tk-surface)] px-4 transition focus-within:border-[var(--tk-accent)]">
+                  <Search className="h-4 w-4 shrink-0 text-[var(--tk-muted)]" />
+                  <input
+                    name="q"
+                    type="search"
+                    placeholder="Search the library"
+                    className="w-44 min-w-0 bg-transparent text-sm font-medium outline-none placeholder:text-[var(--tk-muted)] sm:w-52"
+                  />
+                </form>
+                <form action={basePath} className="flex items-center gap-2.5">
+                  <div className="relative">
+                    <select
+                      name="category"
+                      defaultValue={category}
+                      className="h-11 appearance-none rounded-full border border-[var(--tk-line)] bg-[var(--tk-surface)] pl-4 pr-10 text-sm font-medium text-[var(--tk-text)] outline-none transition focus:border-[var(--tk-accent)]"
+                      aria-label={voice?.filterLabel || 'Filter category'}
+                    >
+                      <option value="all">All collections</option>
+                      {CATEGORY_OPTIONS.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--tk-muted)]" />
+                  </div>
+                  <button className="inline-flex h-11 items-center rounded-full bg-[var(--tk-accent)] px-5 text-sm font-semibold text-[var(--tk-on-accent)] transition hover:opacity-90">Filter</button>
+                </form>
+              </div>
             </div>
           </div>
         </header>
 
-        <section className="mx-auto max-w-[var(--editable-container)] px-6 py-16 sm:py-20 lg:px-8">
-          {posts.length ? (
-            <div className={taskGrid[task]}>
-              {posts.map((post, index) => <ArchivePostCard key={post.id || post.slug} post={post} task={task} basePath={basePath} index={index} />)}
+                  {posts.length ? (
+            <div className="mt-14">
+              <Ads slot="in-feed" showLabel className="mx-auto w-full" />
             </div>
-          ) : (
+          ) : null}
+
+        <section className="mx-auto max-w-[var(--editable-container)] px-6 py-16 sm:py-20 lg:px-8">
+          {(() => {
+            // Lead with a featured resource on the SBM library's first, unfiltered page.
+            const showFeatured = task === 'sbm' && page === 1 && category === 'all' && posts.length > 3
+            const featured = showFeatured ? posts[0] : null
+            const gridPosts = featured ? posts.slice(1) : posts
+            if (!posts.length) return null
+            return (
+              <>
+                {featured ? <BookmarkFeatured post={featured} href={`${basePath}/${featured.slug}`} /> : null}
+                <div className={taskGrid[task]}>
+                  {gridPosts.map((post, index) => <ArchivePostCard key={post.id || post.slug} post={post} task={task} basePath={basePath} index={index} />)}
+                </div>
+              </>
+            )
+          })()}
+          {!posts.length ? (
             <div className="mx-auto max-w-xl rounded-[var(--tk-radius)] border border-dashed border-[var(--tk-line)] bg-[var(--tk-surface)] px-8 py-16 text-center">
               <Search className="mx-auto h-7 w-7 text-[var(--tk-muted)]" />
               <h2 className="editable-display mt-5 text-2xl font-semibold tracking-[-0.02em]">Nothing here yet</h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--tk-muted)]">Try another category, or check back after new {label.toLowerCase()} are published.</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--tk-muted)]">Try another collection, or check back after new {label.toLowerCase()} are saved.</p>
             </div>
-          )}
+          ) : null}
+
+
 
           {posts.length ? (
             <nav className="mt-16 flex items-center justify-center gap-3 text-sm">
@@ -304,17 +341,77 @@ function ImageArchiveCard({ post, href, index }: { post: SitePost; href: string;
 }
 
 function BookmarkArchiveCard({ post, href, index }: { post: SitePost; href: string; index: number }) {
-  const website = getField(post, ['website', 'url', 'link'])
+  const website = getField(post, ['website', 'url', 'link', 'source'])
+  const favicon = faviconFor(website)
+  const category = getCategory(post, 'Resource')
+  const tags = getTags(post)
   return (
-    <Link href={href} className={`${cardBase} flex gap-4 p-6`}>
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--tk-accent-soft)] text-[var(--tk-accent)]">
-        <Globe className="h-5 w-5" />
+    <Link
+      href={href}
+      data-reveal
+      style={{ '--reveal-delay': `${(index % 3) * 70}ms` } as CSSProperties}
+      className={`${cardBase} flex flex-col p-6`}
+    >
+      <div className="flex items-center gap-3.5">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--tk-line)] bg-[var(--tk-raised)] text-[var(--tk-accent)]">
+          {favicon ? <img src={favicon} alt="" className="h-6 w-6 object-contain" loading="lazy" /> : <Globe className="h-5 w-5" />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--tk-accent-soft)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--tk-accent)]">{category}</span>
+          {website ? <p className="mt-1.5 truncate text-xs font-medium text-[var(--tk-muted)]">{cleanDomain(website)}</p> : null}
+        </div>
       </div>
-      <div className="min-w-0 flex-1">
-        <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-[var(--tk-muted)]">Saved · {String(index + 1).padStart(2, '0')}</span>
-        <h2 className="editable-display mt-1.5 text-lg font-semibold leading-snug tracking-[-0.02em]">{post.title}</h2>
-        <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--tk-muted)]">{getSummary(post)}</p>
-        {website ? <p className="mt-3 truncate text-xs font-medium text-[var(--tk-accent)]">{cleanDomain(website)}</p> : null}
+      <h2 className="editable-display mt-4 line-clamp-2 text-lg font-semibold leading-snug tracking-[-0.01em]">{post.title}</h2>
+      <p className="mt-2 line-clamp-2 flex-1 text-sm leading-6 text-[var(--tk-muted)]">{getSummary(post)}</p>
+      <div className="mt-4 flex items-center justify-between border-t border-[var(--tk-line)] pt-3.5">
+        {tags.length ? (
+          <div className="flex min-w-0 flex-wrap gap-1.5">
+            {tags.slice(0, 2).map((tag) => (
+              <span key={tag} className="truncate rounded-md bg-[var(--tk-raised)] px-2 py-0.5 text-[11px] font-medium text-[var(--tk-muted)]">#{tag}</span>
+            ))}
+          </div>
+        ) : <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--tk-muted)]">No. {String(index + 1).padStart(2, '0')}</span>}
+        <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[var(--tk-accent)]">Open <ExternalLink className="h-3.5 w-3.5" /></span>
+      </div>
+    </Link>
+  )
+}
+
+function BookmarkFeatured({ post, href }: { post: SitePost; href: string }) {
+  const website = getField(post, ['website', 'url', 'link', 'source'])
+  const favicon = faviconFor(website)
+  const category = getCategory(post, 'Featured')
+  const image = getImage(post)
+  const hasImage = image && !image.includes('placeholder')
+  return (
+    <Link
+      href={href}
+      data-reveal
+      className={`${cardBase} group mb-8 grid gap-0 overflow-hidden md:grid-cols-[1.1fr_1fr]`}
+    >
+      <div className="relative min-h-[240px] overflow-hidden bg-[var(--tk-raised)]">
+        {hasImage ? (
+          <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]" />
+        ) : (
+          <div className="absolute inset-0 bg-[radial-gradient(70%_70%_at_30%_20%,var(--tk-accent-soft),transparent_70%)]" />
+        )}
+        <span className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-[var(--tk-surface)]/95 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--tk-accent)] shadow-sm">
+          <Star className="h-3.5 w-3.5 fill-[var(--tk-accent)]" /> Featured save
+        </span>
+      </div>
+      <div className="flex flex-col justify-center p-7 sm:p-10">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-[var(--tk-line)] bg-[var(--tk-raised)]">
+            {favicon ? <img src={favicon} alt="" className="h-5 w-5 object-contain" /> : <Globe className="h-4 w-4 text-[var(--tk-accent)]" />}
+          </div>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--tk-accent)]">{category}</span>
+        </div>
+        <h2 className="editable-display mt-4 text-2xl font-semibold leading-tight tracking-[-0.02em] sm:text-3xl">{post.title}</h2>
+        <p className="mt-3 line-clamp-3 text-[15px] leading-7 text-[var(--tk-muted)]">{getSummary(post)}</p>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <span className="inline-flex items-center gap-2 rounded-full bg-[var(--tk-accent)] px-5 py-2.5 text-sm font-semibold text-[var(--tk-on-accent)]">Open resource <ExternalLink className="h-4 w-4" /></span>
+          {website ? <span className="text-xs font-medium text-[var(--tk-muted)]">{cleanDomain(website)}</span> : null}
+        </div>
       </div>
     </Link>
   )
